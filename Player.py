@@ -17,12 +17,11 @@ class Player(object):
         print("========================")
 
 
-    def player_place_ship(self, default_list:list = []) -> None:
+    def player_place_ship(self) -> None:
         """
         Do the move of the player. Check if its direction and location inputs are valid or not.
         If the values are valid, update the board and then draw the board.
-        :param default_list:
-        :return:
+        :return: None
         """
 
 
@@ -31,12 +30,8 @@ class Player(object):
                 print(f"{self.name}'s Placement Board")
                 self.board._drawBoard()
                 while True:
-                    if default_list: # if a hardcoded list provided
-                        print(f"{self.name} enter horizontal or vertical for the orientation of {ship.name} which is {ship.size} long: horizontal")
-                        direction = default_list[i][0]
-                    else:
-                        direction = input(f"{self.name} enter horizontal or vertical for the orientation of {ship.name} which is {ship.size} long: ")
-                        direction = direction.lower()
+                    direction = input(f"{self.name} enter horizontal or vertical for the orientation of {ship.name} which is {ship.size} long: ")
+                    direction = direction.lower()
 
                     direction_len = len(direction)
                     if "horizontal"[0: direction_len] == direction:
@@ -49,15 +44,9 @@ class Player(object):
                         print(f"{direction} does not represent an Orientation.")
                         continue
 
-
                 while True:
-                    if default_list:
-                        print(
-                            f"{self.name}, enter the starting position for your {ship.name} ship ,which is {ship.size} long, in the form row, column:")
-                        coordinates = default_list[i][1].replace(" ", "").split(",")
-                    else:
-                        user_input = input(f"{self.name}, enter the starting position for your {ship.name} ship, which is {ship.size} long, in the form row, column: ")
-                        coordinates = user_input.replace(" ", "").split(",")
+                    user_input = input(f"{self.name}, enter the starting position for your {ship.name} ship ,which is {ship.size} long, in the form row, column: ")
+                    coordinates = user_input.replace(" ", "").split(",")
 
                     if len(coordinates) != 2:
                         print(f"{user_input} is not in the form x,y.\n")

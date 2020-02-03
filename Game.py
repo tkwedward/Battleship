@@ -47,6 +47,7 @@ class Game(object):
             for col in row1:
                 row_str += col + (max_length - len(col) + 1) * " "
             print(row_str[0:-1])
+        print()
 
 
         # to print attacker's board
@@ -57,6 +58,7 @@ class Game(object):
             for col in row:
                 row_str += col + (max_length - len(col) + 1) * " "
             print(row_str[0:-1])
+        print()
 
     @staticmethod
     def player_attack(attacker: "player.Player", defender: "player.Player", round: "int", user_coordinates: tuple = None, symbol: object = gameSymbol)-> None:
@@ -116,13 +118,13 @@ class Game(object):
                 if defender.board.boardArray[y+1][x+1] == "*":
                     # if miss
                     defender.board.boardArray[y+1][x+1] = symbol["miss"]
-                    print(f"Miss.")
+                    print(f"Miss")
                     Game.draw_board_side_by_side(attacker, defender, round)
                     valid_attack = True
 
                 elif defender.board.boardArray[y+1][x+1] in [symbol["miss"], symbol["hit"]]:
                     # if already fired
-                    print(f"You have already fired at {x}, {y}.")
+                    print(f"You have already fired at {y}, {x}.")
                     valid_attack = False
 
                 else: # the target is hit
@@ -130,19 +132,19 @@ class Game(object):
                     for ship in defender.shipArray:
                         for c in ship.coordinateList:
                             if c == [x, y]:
-                                print(f"You hit {defender.name}'s {ship.name} at {x, y}.")
+                                print(f"You hit {defender.name}'s {ship.name}!")
                                 ship.health -= 1
                                 if ship.health == 0:
-                                    print(f"You destroyed {defender.name}'s {ship.name}.")
+                                    print(f"You destroyed {defender.name}'s {ship.name}")
                                 Game.draw_board_side_by_side(attacker, defender, round)
                     valid_attack = True
             except IndexError:
                 y_length = len(defender.board.boardArray)
                 x_length = len(defender.board.boardArray[0])
                 if y_length < y + 1:
-                    print("your y coordinate is out of bound")
+                    print("your row entry is out of bound")
                 if x_length < x + 1:
-                    print("your x coordinate is out of bound")
+                    print("your column entry is out of bound")
                     valid_attack = False
             except UnboundLocalError:
                 valid_attack = False

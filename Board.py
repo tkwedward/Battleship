@@ -30,7 +30,6 @@ class GameBoard(object):
             for col in row:
                 row_str += col + (max_length - len(col) + 1) * " "
             print(row_str[0:-1])
-        print("\n")
 
     def _placeShip(self, ship: str, direction: str, coordinate: typing.Tuple[int, int], shipArray: typing.List) -> None:
         """
