@@ -8,7 +8,7 @@ class Player(object):
 
     def print_ship_array(self) -> None:
         """
-        Please the ships of the player
+        print the ships of the player
         :return:
         """
         print(f"{self.name}'s ship")
@@ -28,12 +28,14 @@ class Player(object):
 
         for i, ship in enumerate(self.shipArray):
             while True:
+                print(f"{self.name}'s Placement Board")
                 self.board._drawBoard()
                 while True:
                     if default_list: # if a hardcoded list provided
+                        print(f"{self.name} enter horizontal or vertical for the orientation of {ship.name} which is {ship.size} long: horizontal")
                         direction = default_list[i][0]
                     else:
-                        direction = input(f"{self.name}, please enter the direction you want {ship.name} (ship{i}, size: {ship.size}) to be placed on the board.")
+                        direction = input(f"{self.name} enter horizontal or vertical for the orientation of {ship.name} which is {ship.size} long: ")
                         direction = direction.lower()
 
                     direction_len = len(direction)
@@ -50,9 +52,11 @@ class Player(object):
 
                 while True:
                     if default_list:
+                        print(
+                            f"{self.name}, enter the starting position for your {ship.name} ship ,which is {ship.size} long, in the form row, column:")
                         coordinates = default_list[i][1].replace(" ", "").split(",")
                     else:
-                        user_input = input(f"please enter the coordinate of the {ship.name}.")
+                        user_input = input(f"{self.name}, enter the starting position for your {ship.name} ship, which is {ship.size} long, in the form row, column: ")
                         coordinates = user_input.replace(" ", "").split(",")
 
                     if len(coordinates) != 2:
@@ -67,8 +71,9 @@ class Player(object):
                     else:
                         break
 
-                valid_placement = self.board._placeShip(ship, direction, coordinates)
+                valid_placement = self.board._placeShip(ship, direction, coordinates, self.shipArray)
                 if (valid_placement):
                     if i == len(self.shipArray)-1:
+                        print(f"{self.name}'s Placement Board")
                         self.board._drawBoard()
                     break

@@ -1,8 +1,8 @@
 import typing
 class GameBoard(object):
     def __init__(self, size: typing.Tuple[int, int]) -> None:
-        self.horizontal = int(size[0])
-        self.vertical = int(size[1])
+        self.horizontal = int(size[1])
+        self.vertical = int(size[0])
         self.boardArray = []
         self._createBoard()
 
@@ -23,39 +23,47 @@ class GameBoard(object):
         self.boardArray.insert(0, x_coordinate)
 
     def _drawBoard(self) -> None:
+
         max_length = len(max([cell for row in self.boardArray for cell in row], key=lambda x: len(x)))
         for row in self.boardArray:
             row_str = ""
             for col in row:
-                row_str += col + (max_length - len(col) + 2) * " "
-            print(row_str)
-        print("")
+                row_str += col + (max_length - len(col) + 1) * " "
+            print(row_str[0:-1])
+        print("\n")
 
-    def _placeShip(self, ship: str, direction: str, coordinate: typing.Tuple[int, int]) -> None:
-
+    def _placeShip(self, ship: str, direction: str, coordinate: typing.Tuple[int, int], shipArray: typing.List) -> None:
         """
-        boardClass, board: which board want to update:
-        str, direction: direction of the ship
-        tuple(int, int), coordinate: coordination of the ship
-        :return: None
+        to place the ship into the board
         1. Check if the ship is out of bound
         2. Check if there if overlap
+        :param ship, str: the name of the ship
+        :param direction, str: direction of the ship
+        :param coordinate, tuple:  coordination of the ship
+        :return:
         """
         y = int(coordinate[0]) + 1
         x = int(coordinate[1]) + 1
 
-        print("--------", direction)
         try:
             if "horizontal".find(direction) != -1:
                 # check if the ship are overlapped
                 valid_placement_check = all([self.boardArray[y][col] == "*" for col in range(x, x + ship.size)])
                 if valid_placement_check == True:
                     for col in range(x, x + ship.size):
-                        self.boardArray[y][col] = ship.name[0]
+                        self.boardArray[y][col] = ship.name[0] # put the initial into the board
                         ship.coordinateList.append([col-1, y-1])
                     return True
                 else:
-                    print("Invalid placement, there is already a ship there")
+                    print(shipArray)
+                    for _ship in shipArray:
+                        print(y-1, x-1)
+                        print(_ship.coordinateList)
+                        for y in _ship.coordinateList:
+                            print((y-1, x-1)==y)
+
+                    print(f"column: Cannot place {ship.name} vertically at 2, 0 because it would overlap with ['P']")
+
                     return False
         except:
             print(f"Cannot place {ship.name} {direction} at {coordinate[0]}, {coordinate[1]} because it would end up out of bounds..\n")

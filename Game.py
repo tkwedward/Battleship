@@ -1,28 +1,17 @@
 import copy
 from Board import GameBoard
 
-def colorSentence(sentence: str, color: str="red") -> str:
-    """
-    To colorize the output in the console
-    :param sentence: the str you want to colorize
-    :param color: the color you want to choose, only red and yellow
-    :return: the colorized sentence
-    """
-    if color == "red":
-        CRED = '\033[91m'
-        CEND = '\033[0m'
-    else:
-        CRED = '\033[33m'
-        CEND = '\033[0m'
-    return (CRED +  sentence + CEND)
-
 class lengthError(Exception):
+    """Raised when the length of the input is not 2."""
+    pass
+
+class negativeError(Exception):
     """Raised when the length of the input is not 2."""
     pass
 
 class Game(object):
     gameRound = 1
-    gameSymbol = {"miss": "✖", "hit": "◎"}
+    gameSymbol = {"miss": "O", "hit": "X"}
 
     def __init__(self, player1: "player.Player", player2: "player.Player", board1: GameBoard, board2: GameBoard) -> None:
         self.player1 = player1
@@ -39,26 +28,12 @@ class Game(object):
         :param round: number of round
         :return: None
         """
-        allowed_symbol = ["*", "◎", Game.gameSymbol["miss"]]
+        allowed_symbol = ["*", "X", "O"]
         masked_map = copy.deepcopy(defender.board.boardArray)
         max_length = len(max([cell for row in masked_map for cell in row], key=lambda x: len(x)))
 
-        print("=" * 20, f" {attacker.name}'s Round (round {round}) ", "=" * 20)
-        # to print attacker's board
-        for row in attacker.board.boardArray:
-            row_str = ""
-            for col in row:
-                if col == Game.gameSymbol["miss"]:
-                    row_str += colorSentence(col + (max_length - len(col) + 2) * " ")
-                elif col == Game.gameSymbol["hit"]:
-                    row_str += colorSentence(col + (max_length - len(col) + 2) * " ", "yellow")
-                else:
-                    row_str += col + (max_length - len(col) + 2) * " "
-            print(row_str)
-        print(f"attacker: {attacker.name}\n")
-
         # to create a masked map from the defender's board
-
+        print(f"{attacker.name}'s Scanning Board")
         for i, row in enumerate(masked_map):
             for j, cell in enumerate(row):
                 if cell in allowed_symbol or cell.isdigit() or cell == " ":
@@ -70,20 +45,21 @@ class Game(object):
         for row1 in masked_map:
             row_str = ""
             for col in row1:
-                if col == Game.gameSymbol["miss"]:
-                    row_str += colorSentence(col + (max_length - len(col) + 2) * " ")
-                elif col == Game.gameSymbol["hit"]:
-                    row_str += colorSentence(col + (max_length - len(col) + 2) * " ", "yellow")
-                else:
-                    row_str += col + (max_length - len(col) + 2) * " "
-            print(row_str)
-        print(f"defender: {defender.name}\n")
+                row_str += col + (max_length - len(col) + 1) * " "
+            print(row_str[0:-1])
 
-        ship_info = ", ".join(f"{ship.name}: {ship.health}" for ship in attacker.shipArray)
-        print(f"{attacker.name}'s ships information [{ship_info}]")
+
+        # to print attacker's board
+
+        print(f"{attacker.name}'s Board")
+        for row in attacker.board.boardArray:
+            row_str = ""
+            for col in row:
+                row_str += col + (max_length - len(col) + 1) * " "
+            print(row_str[0:-1])
 
     @staticmethod
-    def player_attack(attacker: "player.Player", defender: "player.Player", round: "int", symbol: object = gameSymbol)-> None:
+    def player_attack(attacker: "player.Player", defender: "player.Player", round: "int", user_coordinates: tuple = None, symbol: object = gameSymbol)-> None:
         """
         To allow players attack each other
         :param attacker: the attacker
@@ -96,40 +72,57 @@ class Game(object):
 
         Game.draw_board_side_by_side(attacker, defender, round)
         while not valid_attack:
-            user_input = input(colorSentence(f"Please enter coordinates (in the format: x, y) to attack {defender.name}. "))
 
-
-            coordinates = user_input.replace(" ", "").split(",")
+            if user_coordinates:
+                user_input = user_coordinates
+            else:
+                user_input = input(f"{attacker.name}, enter the location you want to fire at in the form row, column: ")
 
             try:
+                coordinates = user_input.replace(" ", "").split(",")
+
                 if len(coordinates) != 2:
                     raise (lengthError)
                 else:
-                    x, y = int(coordinates[0]), int(coordinates[1])
+                    x, y = int(coordinates[1]), int(coordinates[0])
+                    if x < 0:
+                        print(f"col: Col should be non negative. {coordinates[1]} is NOT a positive number.")
+                        raise negativeError
+                    if y < 0:
+                        print(f"row: Row should be non negative. {coordinates[0]} is NOT a positive number.")
+                        raise negativeError
             except IndexError:
                 print(f"{user_input} is not a valid location.\nEnter the firing location in the form row, column")
                 continue
             except lengthError:
                 print("The length of the coordinates must be 2.")
                 continue
+
+            except AttributeError:
+                print(f"-----Your input is not in the format x, y")
+                valid_attack = False
+                continue
+            except negativeError:
+                continue
             except:
                 if not coordinates[0].isdigit():
                     print(f"row: Row should be an integer. {coordinates[0]} is NOT an integer.")
                 if not coordinates[1].isdigit():
                     print(f"col: Column should be an integer. {coordinates[1]} is NOT an integer.")
+
                 continue
 
             try:
                 if defender.board.boardArray[y+1][x+1] == "*":
                     # if miss
                     defender.board.boardArray[y+1][x+1] = symbol["miss"]
+                    print(f"Miss.")
                     Game.draw_board_side_by_side(attacker, defender, round)
-                    print(colorSentence(f"Miss. Nothing is at {x}, {y}."))
                     valid_attack = True
 
                 elif defender.board.boardArray[y+1][x+1] in [symbol["miss"], symbol["hit"]]:
                     # if already fired
-                    print(colorSentence(f"You have already fired at {x}, {y}."))
+                    print(f"You have already fired at {x}, {y}.")
                     valid_attack = False
 
                 else: # the target is hit
@@ -137,10 +130,11 @@ class Game(object):
                     for ship in defender.shipArray:
                         for c in ship.coordinateList:
                             if c == [x, y]:
-                                print(colorSentence(f"You hit {defender.name}'s {ship.name} at {x, y}."))
+                                print(f"You hit {defender.name}'s {ship.name} at {x, y}.")
                                 ship.health -= 1
                                 if ship.health == 0:
-                                    print(colorSentence(f"You destroyed {defender.name}'s {ship.name}."))
+                                    print(f"You destroyed {defender.name}'s {ship.name}.")
+                                Game.draw_board_side_by_side(attacker, defender, round)
                     valid_attack = True
             except IndexError:
                 y_length = len(defender.board.boardArray)
@@ -149,7 +143,9 @@ class Game(object):
                     print("your y coordinate is out of bound")
                 if x_length < x + 1:
                     print("your x coordinate is out of bound")
-
+                    valid_attack = False
+            except UnboundLocalError:
+                valid_attack = False
 
 
     @staticmethod
